@@ -1,0 +1,38 @@
+#!/command/with-contenv sh
+# Authenticate Tailscale at container startup
+# Runs AFTER tailscaled is started by s6, before services are fully up
+
+SOCKET=/run/tailscale/tailscaled.sock
+MAX_WAIT=30
+WAITED=0
+
+# Wait for tailscaled socket to appear
+while [ ! -S "${SOCKET}" ] && [ $WAITED -lt $MAX_WAIT ]; do
+    sleep 1
+    WAITED=$((WAITED + 1))
+done
+
+if [ ! -S "${SOCKET}" ]; then
+    echo "tailscaled socket did not appear after ${MAX_WAIT}s" >&2
+    exit 1
+fi
+
+# Skip if no auth key
+if [ -z "${TS_AUTHKEY:-}" ]; then
+    echo "TS_AUTHKEY not set — skipping Tailscale auth" >&2
+    exit 0
+fi
+
+# Check if already authenticated (state persisted on volume)
+if tailscale --socket="${SOCKET}" status >/dev/null 2>&1; then
+    echo "Tailscale already authenticated — nothing to do"
+    exit 0
+fi
+
+echo "Authenticating Tailscale node..."
+tailscale --socket="${SOCKET}" up \
+    --auth-key="${TS_AUTHKEY}" \
+    --hostname="${TS_HOSTNAME:-railway-hermes}" \
+    --accept-routes
+
+echo "Tailscale authenticated"
