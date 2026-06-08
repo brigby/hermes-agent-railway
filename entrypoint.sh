@@ -46,7 +46,7 @@ fi
 # ── Hermes Dashboard ──
 # Bind 0.0.0.0 for Tailscale access (Desktop app + web browser)
 echo "[hermes] Starting dashboard on 0.0.0.0:9119..."
-hermes dashboard --host 0.0.0.0 --port 9119 --no-open &
+hermes dashboard --host 0.0.0.0 --port 9119 --no-open --insecure &
 
 # ── Hermes WebUI ──
 # Mobile-friendly chat interface on port 8787
