@@ -1,0 +1,4 @@
+#!/command/with-contenv sh
+# Don't restart on clean shutdown (SIGTERM during container stop)
+test "$1" = "0" || test "$1" = "256" && exit 125
+exit 0
