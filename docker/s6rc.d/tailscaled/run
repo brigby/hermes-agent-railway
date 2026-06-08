@@ -1,0 +1,12 @@
+#!/command/with-contenv sh
+# Tailscale userspace networking mode for Railway
+# (Railway containers don't have /dev/net/tun)
+
+export HOME=/opt/data
+TS_STATE_DIR="${TS_STATE_DIR:-/opt/data/tailscale}"
+
+exec s6-setuidgid hermes \
+    tailscaled \
+    --tun=userspace-networking \
+    --state="${TS_STATE_DIR}" \
+    --socket=/run/tailscale/tailscaled.sock
